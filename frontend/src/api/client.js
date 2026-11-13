@@ -4,6 +4,11 @@ export async function api(path,options={}){
  if(!r.ok){let d=await r.json().catch(()=>({detail:'连接失败，请稍后重试'}));if(r.status===401&&path!='/auth/login'){session.clear();location.hash='#/login';}throw new Error(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail));}
  return r.json();
 }
+export async function downloadJob(id,format){
+ const r=await fetch('/api/jobs/'+id+'/export?format='+format,{headers:{Authorization:'Bearer '+session.token}});
+ if(!r.ok){let d=await r.json().catch(()=>({detail:'下载失败'}));throw new Error(typeof d.detail==='string'?d.detail:'下载失败');}
+ const u=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=u;a.download='分析明细-'+id+'.'+format;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
 export async function download(id,format){
  const r=await fetch('/api/deliveries/'+id+'/download?format='+format,{headers:{Authorization:'Bearer '+session.token}});
  if(!r.ok)throw new Error('下载失败，请重试');
